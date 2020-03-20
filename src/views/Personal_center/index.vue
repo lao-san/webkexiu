@@ -6,7 +6,7 @@
         <p style="letter-spacing:2px">科袖会议,致力于最专业的会议集成系统</p>
       </div>
       <div class="right" style="padding:10px 0px;">
-        <div>
+        <!-- <div>
           <el-dropdown class="right">
             <span class="el-dropdown-link">{{username}}</span>
             <el-dropdown-menu slot="dropdown">
@@ -16,7 +16,7 @@
               <el-dropdown-item>退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
-        </div>
+        </div>-->
         <div>
           <ul class="nav">
             <router-link to="/">
@@ -83,23 +83,23 @@
             <div class="form_person" style>
               <div>
                 <ul>
-                  <li>姓名: {{person.name}}</li>
-                  <li>手机:{{person.tel}}</li>
-                  <li>邮箱:{{person.emal}}</li>
+                  <li>姓名: {{person.truename}}</li>
+                  <li>手机:{{person.phone}}</li>
+                  <li>邮箱:{{person.email}}</li>
                   <li>职位:{{person.position}}</li>
-                  <li>机构:{{person.institutions}}</li>
+                  <li>机构:{{person.organization}}</li>
                 </ul>
-                <div class="keycode text-center">
+                <!-- <div class="keycode text-center">
                   <img src="../../img/微信图片_20200221162526.png" alt />
                   <div>
                     <el-link style="color:skyblue">点击下载二维码</el-link>
                   </div>
-                </div>
+                </div>-->
                 <el-button
                   style="margin-top:30px"
                   type="primary"
                   @click="dialogFormVisible = true"
-                >修改</el-button>
+                >补充个人信息</el-button>
               </div>
             </div>
             <div class="order">
@@ -109,12 +109,23 @@
               <div>
                 <el-table :data="tableData" style="width: 100%">
                   <el-table-column label="序号" type="index"></el-table-column>
-                  <el-table-column label="会议名称" prop="cname"></el-table-column>
-                  <el-table-column prop="code" label="订单编号"></el-table-column>
-                  <el-table-column prop="name" label="缴纳人"></el-table-column>
-                  <el-table-column prop="address" label="所在机构"></el-table-column>
-                  <el-table-column prop="payment" label="缴费方式"></el-table-column>
-                  <el-table-column prop="date" label="缴费时间"></el-table-column>
+                  <el-table-column label="会议名称" prop="meetingName"></el-table-column>
+                  <el-table-column prop="order_id" label="订单编号"></el-table-column>
+                  <el-table-column prop="attendersName" label="参会人名称"></el-table-column>
+                  <el-table-column prop="organization" label="所在机构"></el-table-column>
+                  <el-table-column prop="typeName" label="缴费方式"></el-table-column>
+                  <el-table-column prop="pay_time" label="缴费时间"></el-table-column>
+                  <el-table-column label="下载二维码">
+                    <template slot-scope="scope">
+                      <el-popover trigger="hover" placement="top-end">
+                        <div class="name-wrapper">
+                          <!-- <el-img></el-img> -->
+                          <img src="../../img/微信图片_20200221162526.png" style="width:150px;" />
+                        </div>
+                        <el-link slot="reference">点击下载 {{ scope.row.order_id}}</el-link>
+                      </el-popover>
+                    </template>
+                  </el-table-column>
                 </el-table>
               </div>
             </div>
@@ -164,27 +175,27 @@
     </el-footer>
     <div class="gradient"></div>
     <!-- 弹窗 -->
-    <el-dialog title="修改个人信息" :visible.sync="dialogFormVisible">
+    <el-dialog title="补充个人信息" :visible.sync="dialogFormVisible">
       <el-form :model="form">
         <el-form-item label="姓名:" :label-width="formLabelWidth">
-          <el-input v-model="person.name"></el-input>
+          <el-input v-model="person.truename"></el-input>
         </el-form-item>
         <el-form-item label="电话:" :label-width="formLabelWidth">
-          <el-input v-model="person.tel"></el-input>
+          <el-input v-model="person.phone"></el-input>
         </el-form-item>
         <el-form-item label="邮箱:" :label-width="formLabelWidth">
-          <el-input v-model="person.emal"></el-input>
+          <el-input v-model="person.email"></el-input>
         </el-form-item>
         <el-form-item label="职位:" :label-width="formLabelWidth">
           <el-input v-model="person.position"></el-input>
         </el-form-item>
         <el-form-item label="所在机构:" :label-width="formLabelWidth">
-          <el-input v-model="person.institutions"></el-input>
+          <el-input v-model="person.organization"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">提 交</el-button>
+        <el-button type="primary" @click="modifyInformation()">提 交</el-button>
       </div>
     </el-dialog>
   </el-container>
@@ -192,6 +203,7 @@
 
 <script>
 import applyMeeting from "../../components/compoents-home/apply-meeting.vue";
+import { Message } from "element-ui";
 export default {
   name: "pscenter",
   data() {
@@ -199,24 +211,7 @@ export default {
       username: "用户名称(后期修改)",
       nav_arr: ["首页", "会议信息", "会议日程", "征文投稿"],
       active: 0,
-      tableData: [
-        {
-          date: "2020-05-02",
-          name: "王小虎",
-          code: " XXXXXXXXXXXXXX",
-          address: "上海市普陀区金沙江路 1518 弄",
-          payment: "线上缴费",
-          cname: "海洋会"
-        },
-        {
-          date: "2020-05-02",
-          name: "王小虎",
-          code: " XXXXXXXXXXXXXX",
-          address: "上海市普陀区金沙江路 1518 弄",
-          payment: "线上缴费",
-          cname: "海洋会"
-        }
-      ],
+      tableData: [], //会议名单
       dialogTableVisible: false,
       dialogFormVisible: false,
       form: {
@@ -228,14 +223,12 @@ export default {
         institutions: ""
       },
       formLabelWidth: "100px",
-      person: {
-        name: "王小虎",
-        tel: 140000000,
-        emal: "357@cons.com",
-        position: "请务必提交真实信息",
-        institutions: "上海市普陀区金沙江路 1518 弄"
-      }
+      person: {} //个人信息
     };
+  },
+  created() {
+    this.getInformation(); // 个人信息
+    this.getOrderlist(); // 获取订单
   },
   methods: {
     handClick(index) {
@@ -244,6 +237,46 @@ export default {
     },
     config() {
       this.active = 4;
+      const key = window.sessionStorage.getItem("token");
+      if (!key) {
+        this.$router.push({ path: "/login" });
+      }
+    },
+    //获取用户个人信息
+    getInformation() {
+      this.$http.get("/app/user/info", {}, res => {
+        if (res && res.msg === "success") {
+          this.person = res.user;
+        }
+      });
+    },
+    // 修改/补充个人信息
+    modifyInformation() {
+      window.console.log(this.person);
+      this.$http.post("/app/user/update", this.person, res => {
+        this.dialogFormVisible = false;
+        if (res && res.msg === "success") {
+          window.console.log(res);
+          Message({
+            message: "修改成功",
+            type: "success"
+          });
+        } else {
+          Message.error("修改失败");
+        }
+      });
+    },
+    //获取个人订单
+    getOrderlist() {
+      this.$http.get("/app/user/orderlist", {}, res => {
+        if (res && res.msg) {
+          window.console.log(res);
+          this.tableData = res.orderList;
+        }
+      });
+    },
+    onclick() {
+      window.console.log(1);
     }
   },
   components: {

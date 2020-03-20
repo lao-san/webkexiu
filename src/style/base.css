@@ -138,6 +138,7 @@ html {
 .fz_45 {
     font-size: 45px;
 }
+
 .text-center {
     text-align: center;
 }
@@ -146,8 +147,9 @@ html {
 .fc_white {
     color: #fff;
 }
-.fc_blue{
-    color:rgb(51, 103, 149)
+
+.fc_blue {
+    color: rgb(51, 103, 149)
 }
 
 
@@ -167,7 +169,8 @@ html {
     width: 1200px;
     margin: 0 auto;
 }
-.content_wrap{
+
+.content_wrap {
     width: 820px;
     margin: 0 auto;
 }
@@ -206,15 +209,23 @@ html {
     border-radius: 10px 10px 10px 10px;
 
 }
-.small_title{
+
+.small_title {
     padding-left: 10px;
     border-left: 1px solid #316b9b;
-    border-width:5px;
+    border-width: 5px;
     box-sizing: border-box;
     font-size: 18px;
 }
-.bg_line{
+
+.bg_line {
     height: 5px;
     background: url('../img/xiantiao_01.png') no-repeat center;
     background-size: 100%;
+}
+
+.text-shadow {
+    -moz-text-shadow: black 1px 0 0, black 0 1px 0, black -1px 0 0, black 0 -1px 0;
+    text-shadow: black 2px 0 0, black 0 2px 0, black 2px 0 0, black 0 2px 0;
+    -webkit-text-shadow: black 1px 0 0, black 0 1px 0, black -1px 0 0, black 0 -1px 0;
 }

@@ -6,8 +6,17 @@
       </div>
       <div class="bg_line"></div>
       <div style="padding:10px">
-        日程日程日程日程日程日程日程日程日程日程日程日程日程日程日程日程日程日程日程
-        日程日程日程日程日程日程日程日程日程日程日程日程日程日程日程日程日程日程日程
+        <ul>
+          <li v-for="(item) in meetingTimeList " :key="item.id">
+            <h3>{{item.topic}}</h3>
+            <p>开始时间{{item.createTime}}</p>
+            <p>结束时间{{item.speechTime}}</p>
+            <p>概要</p>
+            <p>{{item.summary}}</p>
+            <br>
+            <hr>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
@@ -17,9 +26,23 @@
 export default {
   name: "meeting-time",
   data() {
-    return {};
+    return {
+      meetingTimeList: []
+    };
   },
-  methods: {}
+  created() {
+    this.getMeetingTime();
+  },
+  methods: {
+    getMeetingTime() {
+      this.$http.get("/app/lecture/list/1", {}, res => {
+        window.console.log(res.lectureList);
+        if (res && res.msg == "success") {
+          this.meetingTimeList = res.lectureList;
+        }
+      });
+    }
+  }
 };
 </script>
 

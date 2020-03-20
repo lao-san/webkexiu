@@ -19,60 +19,58 @@
             </tr>
             <tr>
               <td>
-                <el-radio-group v-model="form.ticket">
-                  <el-radio label="普通票"></el-radio>
-                </el-radio-group>
+                <el-radio :label="0" v-model="form.feeId ">普通票</el-radio>
               </td>
               <td>3000</td>
             </tr>
             <tr>
               <td>
-                <el-radio-group v-model="form.ticket">
-                  <el-radio label="学生票">学生票</el-radio>
-                </el-radio-group>
+                <el-radio :label="1" v-model="form.feeId ">学生票</el-radio>
               </td>
               <td>1600</td>
             </tr>
           </table>
         </el-form-item>
         <el-form-item style="display:inline-block">
-          <el-checkbox-group v-model="form.invoice">
+          <el-checkbox-group v-model="invoice">
             <el-checkbox @click.native="no">我需要发票</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
-        <el-form-item prop="invoice1" v-if="this.form.invoice!=''">
-          <el-radio-group v-model="form.invoice1" style="margin-left:30px;">
-            <el-radio label="普票" @click.native="handClick"></el-radio>
-            <el-radio label="专票"></el-radio>
-          </el-radio-group>
+        <el-form-item prop="invoice1" v-if="this.invoice!=''">
+          <el-radio :label="0" @click.native="handClick" v-model="form.taxType">普票</el-radio>
+          <el-radio :label="1" v-model="form.taxType">专票</el-radio>
         </el-form-item>
-        <el-form-item label="发票抬头:" prop="invoice_rise">
-          <el-input placeholder="请输入发票抬头" style="width:400px" v-model="form.invoice_rise"></el-input>
+        <el-form-item label="发票抬头:" prop="taxTitle">
+          <el-input placeholder="请输入发票抬头" style="width:400px" v-model="form.taxTitle "></el-input>
         </el-form-item>
-        <el-form-item label="企业税号:" prop="taxation_number">
-          <el-input placeholder="请输入企业税号" style="width:400px" v-model="form.taxation_number"></el-input>
+        <el-form-item label="企业税号:" prop="taxNumber">
+          <el-input placeholder="请输入企业税号" style="width:400px" v-model="form.taxNumber "></el-input>
         </el-form-item>
-        <el-form-item label="邮寄地址:" prop="address">
-          <el-input placeholder="请输入详细邮寄地址" style="width:400px" v-model="form.address"></el-input>
+        <el-form-item label="邮寄地址:" prop="taxAddress">
+          <el-input placeholder="请输入详细邮寄地址" style="width:400px" v-model="form.taxAddress "></el-input>
         </el-form-item>
-        <div v-if="this.form.invoice1==='专票'">
-          <el-form-item label="开户行地址电话:" prop="tel">
-            <el-input placeholder="开户行地址电话" style="width:400px" v-model="form.tel"></el-input>
+        <div v-if="this.form.taxType===1">
+          <el-form-item label="开户行地址电话:" prop="addPhone">
+            <el-input placeholder="开户行地址电话" style="width:400px" v-model="form.addPhone"></el-input>
           </el-form-item>
-          <el-form-item label="开户行及账号:" prop="account_number">
-            <el-input placeholder="开户行及账号" style="width:400px" v-model="form.account_number"></el-input>
+          <el-form-item label="开户行及账号:" prop="bankAddrAccount">
+            <el-input placeholder="开户行及账号" style="width:400px" v-model="form.bankAddrAccount "></el-input>
           </el-form-item>
         </div>
 
         <el-form-item>
-          <el-checkbox-group v-model="form.hotl">
-            <el-checkbox>我需要预定酒店（工作人员会与您联系确认具体信息，请保持工作时间的电话通畅）</el-checkbox>
-          </el-checkbox-group>
+          <el-checkbox
+            v-model="form.hotl"
+            true-label="1"
+            false-label="0"
+          >我需要预定酒店（工作人员会与您联系确认具体信息，请保持工作时间的电话通畅）</el-checkbox>
         </el-form-item>
         <el-form-item>
-          <el-checkbox-group v-model="form.taxi">
-            <el-checkbox>我需要接送服务（工作人员会与您联系确认具体信息，请保持工作时间的电话通畅）</el-checkbox>
-          </el-checkbox-group>
+          <el-checkbox
+            v-model="form.taxi"
+            true-label="1"
+            false-label="0"
+          >我需要接送服务（工作人员会与您联系确认具体信息，请保持工作时间的电话通畅）</el-checkbox>
         </el-form-item>
         <el-form-item>
           <el-button
@@ -100,16 +98,16 @@
         </div>
         <div class="order">
           <ul>
-            <li>姓名:{{order.name}}</li>
-            <li>电话:{{order.tel}}</li>
-            <li>邮箱:{{order.emal}}</li>
-            <li>职称:{{order.zhicheng}}</li>
-            <li>职位:{{order.zhiwei}}</li>
-            <li>机构:{{order.jigou}}</li>
-            <li>订单编号:{{order.code}}</li>
-            <li>发票抬头:{{order.taitou}}</li>
-            <li>企业税号:{{order.shuihao}}</li>
-            <li>邮寄地址:{{order.dizhi}}</li>
+            <li v-show="order.truename">姓名:{{order.truename}}</li>
+            <li v-show="order.phone">电话:{{order.phone}}</li>
+            <li v-show="order.email">邮箱:{{order.email}}</li>
+            <li v-show="order.jobTitle">职称:{{order.jobTitle}}</li>
+            <li v-show="order.position">职位:{{order.position}}</li>
+            <li v-show="order.organization">机构:{{order.organization}}</li>
+            <!-- <li>订单编号:{{order.code}}</li> -->
+            <li v-show="form.taxTitle">发票抬头:{{form.taxTitle}}</li>
+            <li v-show="form.taxNumber">企业税号:{{form.taxNumber}}</li>
+            <li v-show="form.taxAddress">邮寄地址:{{form.taxAddress}}</li>
           </ul>
         </div>
         <div class="transfer">
@@ -162,17 +160,18 @@ export default {
     // };
 
     return {
+      invoice: true,
       form: {
-        ticket: "普通票",
-        invoice: true,
-        invoice1: "专票",
-        invoice_rise: "",
-        taxation_number: "",
-        address: "",
-        tel: "",
-        account_number: "",
-        hotl: true,
-        taxi: true
+        feeId: 0,
+        taxType: 0,
+        taxTitle: "",
+        taxNumber: "",
+        taxAddress: "",
+        addPhone: "",
+        bankAddrAccount: "",
+        hotl: "1",
+        taxi: 1,
+        meetingId: 1
       },
       gridData: [
         {
@@ -194,53 +193,71 @@ export default {
       },
       centerDialogVisible: false,
       rules: {
-        invoice_rise: [
+        taxTitle: [
           { required: true, message: "内容不能为空", trigger: "blur" }
         ],
-        taxation_number: [
+        taxNumber: [
           { required: true, message: "内容不能为空", trigger: "blur" }
         ],
-        address: [{ required: true, message: "内容不能为空", trigger: "blur" }],
-        tel: [
+        taxAddress: [
+          { required: true, message: "内容不能为空", trigger: "blur" }
+        ],
+        addPhone: [
           { required: true, message: "内容不能为空", trigger: "blur" }
           // { validator: change_tel, trigger: "blur" }
         ],
-        account_number: [
+        bankAddrAccount: [
           { required: true, message: "内容不能为空", trigger: "blur" }
           // { validator: change_account_number, trigger: "blur" }
         ]
       }
     };
   },
+  created() {
+    this.getUser();
+  },
   methods: {
     open() {
-      this.$message({
-        message: "申请入会成功",
-        type: "success"
+      // this.$message({
+      //   message: "申请入会成功",
+      //   type: "success"
+      // });
+      this.form.mid = window.sessionStorage.getItem("meetingId");
+      // window.console.log(this.form);
+      this.$http.post("/app/order/save", this.form, res => {
+        if (res && res.msg == "sucess") {
+          window.console.log(res);
+        } else {
+          return window.console.log(res);
+        }
       });
+
       this.centerDialogVisible = false;
     },
     handClick() {
-      this.form.tel = "";
-      window.console.log();
-      this.form.account_number = "";
+      this.form.bankAddrAccount = "";
+      this.form.addPhone = "";
     },
     no() {
-      let bol = this.form.invoice;
+      let bol = this.invoice;
       if (bol) {
-        this.form.invoice1 = "";
-      } else {
-        this.form.invoice1 = "普票";
+        this.form.taxType = "";
       }
     },
     submitForm(form) {
       this.$refs[form].validate(valid => {
-        window.console.log(valid);
         if (valid) {
           this.centerDialogVisible = true;
         } else {
-          window.console.log(2);
           return false;
+        }
+      });
+    },
+    //获取个人信息
+    getUser() {
+      this.$http.get("/app/user/info", {}, res => {
+        if (res && res.msg == "success") {
+          this.order = res.user;
         }
       });
     }

@@ -5,10 +5,7 @@
         <span class="small_title">会议投稿</span>
       </div>
       <div class="bg_line"></div>
-      <div style="padding:10px">
-        投稿投稿投稿投稿投稿投稿投稿投稿投稿投稿 投稿投稿投稿投稿投稿投稿投稿投稿投稿投稿 投稿投稿投稿投稿投稿投稿投稿投稿投稿投稿 投稿投稿投稿投稿投稿投稿投稿投稿投稿投稿 投稿投稿投稿投稿投稿投稿投稿投稿投稿投稿 投稿投稿投稿投稿投稿投稿投稿投稿投稿投稿
-        投稿投稿投稿投稿投稿投稿投稿投稿投稿投稿
-      </div>
+      <div style="padding:10px">{{this.content.content}}</div>
     </div>
   </div>
 </template>
@@ -17,9 +14,22 @@
 export default {
   name: "meeting-posting",
   data() {
-    return {};
+    return {
+      content: ""
+    };
   },
-  methods: {}
+  created() {
+    this.getPosting();
+  },
+  methods: {
+    getPosting() {
+      this.$http.get("/app/paperrequire/info/1", {}, res => {
+        if (res && res.msg == "success") {
+          this.content = res.paperRequire;
+        }
+      });
+    }
+  }
 };
 </script>
 

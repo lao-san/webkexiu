@@ -11,7 +11,7 @@
           <user-register></user-register>
         </el-tab-pane>
       </el-tabs>
-      <el-link class="right">忘记密码?</el-link>
+      <!-- <el-link class="right">忘记密码?</el-link> -->
     </el-card>
   </div>
 </template>
@@ -32,7 +32,7 @@ export default {
       setTimeout(function() {}, 600);
 
       this.countdown_text;
-    }
+    },
   },
   components: {
     userLogin,

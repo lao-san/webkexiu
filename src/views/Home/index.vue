@@ -7,13 +7,13 @@
       </div>
       <div class="right" style="padding:10px 0px;">
         <div>
-          <el-dropdown class="right">
+          <el-dropdown class="right" v-if="show">
             <span class="el-dropdown-link">{{username}}</span>
             <el-dropdown-menu slot="dropdown">
               <router-link to="/pcenter">
                 <el-dropdown-item>个人中心</el-dropdown-item>
               </router-link>
-              <el-dropdown-item>退出登录</el-dropdown-item>
+              <el-dropdown-item @click.native="clearUser()">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </div>
@@ -34,24 +34,22 @@
     <el-main class="wrap">
       <div class="main_top">
         <div class="notice left text-center">
-          <h3 style="font-size:30px;color:#336795;font-weight:700">第20届腐蚀材料与防护大会第20届腐蚀材料与防护大会</h3>
+          <h3 style="font-size:30px;color:#336795;font-weight:700">{{this.meetingCollection.nameCn}}</h3>
           <p
             class="fz_20 mt_10"
             style="font-weight:700;color:#5596b3"
-          >XXXXX学术研讨会XXXXX学术研讨会XXXXX学术研讨会</p>
-          <p class="fz_20 mt_10" style="color:#3da7b4">
-            2020年1月1日至2020年1月3日
-            国家会议中心3号厅
-          </p>
+          >{{this.meetingCollection.address}}</p>
+          <p class="fz_20 mt_10" style="color:#3da7b4">{{this.starTime|time}}至{{this.endTime |time}}</p>
+          <p class="fz_20 mt_10" style="color:#3da7b4">{{this.meetingCollection.address}}</p>
         </div>
         <div class="banner right">
           <a href="javascript:">
             <img src="../../img/ChMkJ1bKxr-IM5CbAANCMRdgBAEAALHpwD8-c8AA0JJ753.jpg" alt />
           </a>
           <div class="count_down text-center">
-            <div class="fz_30" style="font-weight:700;color:#fff">距离会议开幕还有</div>
+            <div class="fz_30 text-shadow" style="font-weight:700;color:#fff;">距离会议开幕还有</div>
             <div>
-              <time-down :endTime="endTime"></time-down>
+              <time-down :endTime="this.meetingCollection.onlineRegDeadline"></time-down>
             </div>
           </div>
         </div>
@@ -68,7 +66,7 @@
                   href="javascript:"
                   style="line-height:180px;"
                   class="apply_meeting fz_18 fc_white"
-                  @click.prevent='config'
+                  @click.prevent="config"
                 >申请参会</a>
               </div>
               <div class="right">
@@ -99,7 +97,10 @@
         <apply-meeting v-if="this.active ==4"></apply-meeting>
 
         <div class="meeting_brief right" v-else>
-          <meeting-information v-if="this.active==0||this.active==1"></meeting-information>
+          <meeting-information
+            v-if="this.active==0||this.active==1"
+            :information="this.meetingCollection.introduction"
+          ></meeting-information>
           <meeting-time v-else-if="this.active==2"></meeting-time>
           <meeting-posting v-else-if="this.active==3"></meeting-posting>
         </div>
@@ -149,7 +150,7 @@
 </template>
 
 <script>
-import timeDown from "../../components/count-down";    //倒计时
+import timeDown from "../../components/count-down"; //倒计时
 import meetingInformation from "../../components/compoents-home/meeting-Information.vue"; //会议信息
 import meetingTime from "../../components/compoents-home/meeting-time.vue"; //会议信息
 import meetingPosting from "../../components/compoents-home/meeting-posting.vue"; //会议信息
@@ -159,11 +160,27 @@ export default {
   name: "",
   data() {
     return {
-      username: "用户名称(后期修改)",
+      username: "个人中心",
       nav_arr: ["首页", "会议信息", "会议日程", "征文投稿"],
       active: 0,
-      endTime: "2020-02-24 20:16:00"
+      starTime: "",
+      endTime: "",
+      show: "", //个人中心显示,,
+      meetingCollection: {}
     };
+  },
+  created() {
+    this.personal();
+    this.getMeeting(); //获取会议信息
+    this.getUser(); //获取会员id
+  },
+  filters: {
+    time(val) {
+      return val
+        .split(" ")
+        .splice(0, 1)
+        .join();
+    }
   },
   methods: {
     handClick(index) {
@@ -171,7 +188,33 @@ export default {
     },
     config() {
       this.active = 4;
-      
+      const key = window.sessionStorage.getItem("token");
+      if (!key) {
+        this.$router.push({ path: "/login" });
+      }
+    },
+    personal() {
+      this.show = window.sessionStorage.getItem("token");
+    },
+    clearUser() {
+      window.sessionStorage.removeItem("token");
+      this.$router.go(0);
+    },
+    getMeeting() {
+      this.$http.get("/app/meeting/info/1", {}, res => {
+        if (res && res.msg === "success") {
+          this.meetingCollection = res.meeting;
+          this.starTime = res.meeting.startTime;
+          this.endTime = res.meeting.endTime;
+          window.sessionStorage.setItem('meetingId',res.meeting.id) 
+        }
+      });
+    },
+    getUser() {
+      //获取用户id
+      this.$http.get("/app/user/info", {}, res => {
+        window.sessionStorage.setItem("userId", res.user.userId);
+      });
     }
   },
   components: {
