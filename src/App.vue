@@ -8,6 +8,5 @@
 
 body {
   background-color: #e8f6f9;
-  
 }
 </style>

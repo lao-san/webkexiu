@@ -1,6 +1,6 @@
 <template>
   <p class="fz_20">
-    <span class="time">{{this.day}}</span>:<span class="time">{{this.h}}</span>:<span class="time">{{this.m}}</span>
+    <span class="time">{{this.day}}</span>天<span class="time">{{this.h}}</span>时<span class="time">{{this.m}}</span>分
   </p>
 </template>
  
@@ -71,7 +71,9 @@ p {
   color: #fff;
   .time {
     padding: 5px;
-    background-color: black;
+    font-weight: 700;
+    font-size: 25px;
+    /* background-color:#fff; */
   }
 }
 </style>

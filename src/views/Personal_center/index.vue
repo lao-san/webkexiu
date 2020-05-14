@@ -64,11 +64,11 @@
             <div class="meeting_main">
               <div class="text-center" style="line-height:30px;margin-top:20px">
                 <p class="fc_blue">征文投稿截止日期</p>
-                <p>2020年12月12日</p>
+                <p>{{this.PaperRequireinfoTime}}</p>
                 <p class="fc_blue">网上注册截止日期</p>
-                <p>2020年12月12日</p>
+                <p>{{this.meetingCollection.onlineRegDeadline}}</p>
                 <p class="fc_blue">现场报名时间</p>
-                <p>2020年12月12日</p>
+                <p>{{this.meetingCollection.onlineRegDeadline}}</p>
               </div>
             </div>
           </div>
@@ -105,24 +105,35 @@
             <div class="order">
               <p class="fz_18 content_wrap">参会订单</p>
               <div class="bg_line" style="height:20px;"></div>
-
               <div>
                 <el-table :data="tableData" style="width: 100%">
                   <el-table-column label="序号" type="index"></el-table-column>
-                  <el-table-column label="会议名称" prop="meetingName"></el-table-column>
-                  <el-table-column prop="order_id" label="订单编号"></el-table-column>
-                  <el-table-column prop="attendersName" label="参会人名称"></el-table-column>
-                  <el-table-column prop="organization" label="所在机构"></el-table-column>
-                  <el-table-column prop="typeName" label="缴费方式"></el-table-column>
-                  <el-table-column prop="pay_time" label="缴费时间"></el-table-column>
-                  <el-table-column label="下载二维码">
+                  <el-table-column label="会议名称" prop="meetingName" align="center"></el-table-column>
+                  <el-table-column prop="orderId" label="订单编号" align="center"></el-table-column>
+                  <el-table-column prop="truename" label="参会人名称" align="center"></el-table-column>
+                  <el-table-column prop="organization" label="所在机构" align="center"></el-table-column>
+                  <el-table-column prop="isPay" label="是否缴费" align="center">
+                    <template slot-scope="scope">
+                      <span v-if="scope.row.isPay">已缴费</span>
+                      <span v-else>未缴费</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="payTime" label="缴费时间" align="center"></el-table-column>
+                  <el-table-column label="下载二维码" align="center">
                     <template slot-scope="scope">
                       <el-popover trigger="hover" placement="top-end">
                         <div class="name-wrapper">
                           <!-- <el-img></el-img> -->
-                          <img src="../../img/微信图片_20200221162526.png" style="width:150px;" />
+                          <!-- <img src="../../img/微信图片_20200221162526.png" style="width:150px;" /> -->
+                          <div id="code">
+                            <qr-code :text="qrConfig.value" :margin="0" :size="150"></qr-code>
+                          </div>
                         </div>
-                        <el-link slot="reference">点击下载 {{ scope.row.order_id}}</el-link>
+                        <el-link
+                          id="downLoad"
+                          slot="reference"
+                          @click="downLoading(scope.row.attendersId)"
+                        >生成二维码</el-link>
                       </el-popover>
                     </template>
                   </el-table-column>
@@ -137,20 +148,14 @@
           <div class="meeting_intention meeting_box" style="width:320px; line-height:30px;  ">
             <div class="meeting_title fz_25 fc_white text-center">联系我们</div>
             <div class="meeting_main">
-              <div style="margin:10px">
+              <div style="margin:10px" v-for=" item in personList" :key="item.id">
                 <p>
-                  <span class="fc_blue">会议联系人:</span>李某某
+                  <span class="fc_blue">会议联系人:</span>
+                  {{item.truename}}
                 </p>
                 <p>
-                  <span class="fc_blue">手 机:</span>13888888888
-                </p>
-              </div>
-              <div style="margin:10px">
-                <p>
-                  <span class="fc_blue">会议联系人:</span>李某某
-                </p>
-                <p>
-                  <span class="fc_blue">手 机:</span>13888888888
+                  <span class="fc_blue">手 机:</span>
+                  {{item.phone}}
                 </p>
               </div>
             </div>
@@ -204,6 +209,7 @@
 <script>
 import applyMeeting from "../../components/compoents-home/apply-meeting.vue";
 import { Message } from "element-ui";
+import qrCode from "vue-qr";
 export default {
   name: "pscenter",
   data() {
@@ -223,12 +229,21 @@ export default {
         institutions: ""
       },
       formLabelWidth: "100px",
-      person: {} //个人信息
+      person: {}, //个人信息
+      qrConfig: {
+        value: ""
+      },
+      PaperRequireinfoTime: "",
+      meetingCollection: {},
+      personList: []
     };
   },
   created() {
     this.getInformation(); // 个人信息
     this.getOrderlist(); // 获取订单
+    this.getMeeting();
+    this.getPaperRequireinfo();
+    this.getContactUs();
   },
   methods: {
     handClick(index) {
@@ -266,6 +281,20 @@ export default {
         }
       });
     },
+    getMeeting() {
+      this.$http.get(`/app/meeting/info/${this.baseMeetintgId}`, {}, res => {
+        if (res && res.code === 0) {
+          this.meetingCollection = res.meeting;
+        }
+      });
+    },
+    getPaperRequireinfo() {
+      this.$http.get(`/app/meeting/paperrequireinfo/${this.baseMeetintgId}`, {}, res => {
+        if (res && res.code === 0) {
+          this.PaperRequireinfoTime = res.paperRequir.deadline;
+        }
+      });
+    },
     //获取个人订单
     getOrderlist() {
       this.$http.get("/app/user/orderlist", {}, res => {
@@ -275,12 +304,33 @@ export default {
         }
       });
     },
-    onclick() {
-      window.console.log(1);
+    //获取个人二维码
+    downLoading(id) {
+      this.qrConfig.value =
+        "http://152.136.140.176/qrcode/webmeeting.html?attendersId=" + id;
+      const url = document.querySelector("#code img").src;
+      const a = document.querySelector("#downLoad");
+      a.download = "二维码";
+      a.href = url;
+    },
+    //  修改二维码 地址
+    getUrl(id) {
+      this.qrConfig.value =
+        "http://152.136.140.176/qrcode/webmeeting.html?attendersId=" + id;
+    },
+    getContactUs() {
+      this.$http.get(`/app/meeting/contact/${this.baseMeetintgId}`, {}, res => {
+        if (res && res.code === 0) {
+          this.personList = res.list;
+        } else {
+          window.console.log(res.msg);
+        }
+      });
     }
   },
   components: {
-    applyMeeting
+    applyMeeting,
+    qrCode
   }
 };
 </script>

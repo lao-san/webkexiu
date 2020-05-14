@@ -17,17 +17,16 @@
               <th>注册类型</th>
               <th>单价金额（单位：元）</th>
             </tr>
-            <tr>
-              <td>
-                <el-radio :label="0" v-model="form.feeId ">普通票</el-radio>
+            <tr v-for="(item,index) in meetingList" :key="item.id">
+              <td style="text-align:left">
+                <el-radio
+                  :label="index"
+                  v-model="form.feeId"
+                  @change="change(item)"
+                  style="margin-left:30px"
+                >{{item.name}}</el-radio>
               </td>
-              <td>3000</td>
-            </tr>
-            <tr>
-              <td>
-                <el-radio :label="1" v-model="form.feeId ">学生票</el-radio>
-              </td>
-              <td>1600</td>
+              <td>{{item.money}}</td>
             </tr>
           </table>
         </el-form-item>
@@ -60,10 +59,11 @@
 
         <el-form-item>
           <el-checkbox
-            v-model="form.hotl"
+            v-model="form.room"
             true-label="1"
             false-label="0"
           >我需要预定酒店（工作人员会与您联系确认具体信息，请保持工作时间的电话通畅）</el-checkbox>
+          <el-link href="http://www.baidu.com" style="color:red">点击申请酒店</el-link>
         </el-form-item>
         <el-form-item>
           <el-checkbox
@@ -92,7 +92,7 @@
       <el-dialog title="请确认订单信息" :visible.sync="centerDialogVisible" width="40%">
         <div>
           <el-table :data="gridData">
-            <el-table-column property="invoice1" label="注册类型"></el-table-column>
+            <el-table-column property="name" label="注册类型"></el-table-column>
             <el-table-column property="money" label="应付金额（单位：元）"></el-table-column>
           </el-table>
         </div>
@@ -114,9 +114,9 @@
           <h3 class="fz_16">对公汇款</h3>
           <div class="details">
             <ul>
-              <li>账户名称:中国腐蚀与防护学会</li>
-              <li>开户银行:中国工商银行北京东升路支行</li>
-              <li>银行账号: 0200006209089135234</li>
+              <li>账户名称:{{this.accountinfoList.name}}</li>
+              <li>开户银行:{{this.accountinfoList.bank}}</li>
+              <li>银行账号: {{this.accountinfoList.account}}</li>
             </ul>
           </div>
         </div>
@@ -142,23 +142,6 @@
 export default {
   name: "applyMeeting",
   data() {
-    // let change_tel = (rule, value, callback) => {
-    //   if (value !== "") {
-    //     let reg = /^1[3456789]\d{9}$/;
-    //     if (!reg.test(value)) {
-    //       callback(new Error("请输入正确的手机号码"));
-    //     }
-    //   }
-    // };
-    // let change_account_number = (rule, value, callback) => {
-    //   if (value !== "") {
-    //     let reg = /^[0-9a-zA-Z]+$/;
-    //     if (!reg.test(value)) {
-    //       callback(new Error("请输入正确的账号"));
-    //     }
-    //   }
-    // };
-
     return {
       invoice: true,
       form: {
@@ -169,28 +152,14 @@ export default {
         taxAddress: "",
         addPhone: "",
         bankAddrAccount: "",
-        hotl: "1",
+        room: "1",
         taxi: 1,
         meetingId: 1
       },
-      gridData: [
-        {
-          invoice1: "普通票",
-          money: "3000"
-        }
-      ],
-      order: {
-        code: "G12518113",
-        name: "王小虎",
-        tel: 13800138000,
-        emal: "ekexiu@ekexiu.com",
-        zhicheng: "教授",
-        zhiwei: "院长",
-        jigou: "北京科技大学新材料研究院",
-        taitou: "个人/单位,北京科袖有限公司",
-        shuihao: "xxxxxxxxxx",
-        dizhi: "北京"
-      },
+      gridData: [],
+      order: {},
+      meetingList: [], //会议类型列表
+      accountinfoList: {},
       centerDialogVisible: false,
       rules: {
         taxTitle: [
@@ -215,22 +184,30 @@ export default {
   },
   created() {
     this.getUser();
+    this.getList();
+    this.getAccountinfo();
   },
   methods: {
     open() {
-      // this.$message({
-      //   message: "申请入会成功",
-      //   type: "success"
-      // });
       this.form.mid = window.sessionStorage.getItem("meetingId");
       // window.console.log(this.form);
-      this.$http.post("/app/order/save", this.form, res => {
-        if (res && res.msg == "sucess") {
-          window.console.log(res);
-        } else {
-          return window.console.log(res);
-        }
-      });
+      if (this.order.truename && this.order.position) {
+        this.$http.post("/app/order/save", this.form, res => {
+          if (res && res.code === 0) {
+            this.$message({
+              message: "申请入会成功",
+              type: "success"
+            });
+          } else {
+            return window.console.log(res);
+          }
+        });
+      } else {
+        this.$message({
+          message: "请返回首页,进入个人中心 补充个人信息",
+          type: "error"
+        });
+      }
 
       this.centerDialogVisible = false;
     },
@@ -258,6 +235,30 @@ export default {
       this.$http.get("/app/user/info", {}, res => {
         if (res && res.msg == "success") {
           this.order = res.user;
+        }
+      });
+    },
+    // 获取类型列表
+    getList() {
+      this.$http.get(`/app/typesoffee/list/${this.baseMeetintgId}`, {}, res => {
+        if (res && res.msg == "success") {
+          this.meetingList = res.feeList;
+          this.gridData.push(res.feeList[0]);
+        }
+      });
+    },
+    change(data) {
+      this.gridData.length = 0;
+      this.gridData.push(data);
+    },
+    //获取对公账号信息
+    getAccountinfo() {
+      this.$http.get(`/app/meeting/accountinfo/${this.baseMeetintgId}`, {}, res => {
+        window.console.log(res);
+        if (res && res.code === 0) {
+          this.accountinfoList = res.moneyAccount;
+        } else {
+          window.console.log(res);
         }
       });
     }

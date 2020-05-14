@@ -43,11 +43,17 @@
           <p class="fz_20 mt_10" style="color:#3da7b4">{{this.meetingCollection.address}}</p>
         </div>
         <div class="banner right">
-          <a href="javascript:">
+          <!-- <a href="javascript:">
             <img src="../../img/ChMkJ1bKxr-IM5CbAANCMRdgBAEAALHpwD8-c8AA0JJ753.jpg" alt />
-          </a>
+          </a>-->
+          <el-carousel height="360px">
+            <el-carousel-item v-for="item in imgList" :key="item">
+              <img :src="url+item" style="height:100%" />
+            </el-carousel-item>
+          </el-carousel>
+
           <div class="count_down text-center">
-            <div class="fz_30 text-shadow" style="font-weight:700;color:#fff;">距离会议开幕还有</div>
+            <div class="fz_30" style="font-weight:700;color:#fff; ">距离会议开幕还有</div>
             <div>
               <time-down :endTime="this.meetingCollection.onlineRegDeadline"></time-down>
             </div>
@@ -84,11 +90,11 @@
             <div class="meeting_main">
               <div class="text-center" style="line-height:30px;margin-top:20px">
                 <p class="fc_blue">征文投稿截止日期</p>
-                <p>2020年12月12日</p>
+                <p>{{this.PaperRequireinfoTime}}</p>
                 <p class="fc_blue">网上注册截止日期</p>
-                <p>2020年12月12日</p>
+                <p>{{this.meetingCollection.onlineRegDeadline}}</p>
                 <p class="fc_blue">现场报名时间</p>
-                <p>2020年12月12日</p>
+                <p>{{this.meetingCollection.onlineRegDeadline}}</p>
               </div>
             </div>
           </div>
@@ -110,20 +116,14 @@
           <div class="meeting_intention meeting_box" style="width:320px; line-height:30px;  ">
             <div class="meeting_title fz_25 fc_white text-center">联系我们</div>
             <div class="meeting_main">
-              <div style="margin:10px">
+              <div style="margin:10px" v-for=" item in personList" :key="item.id">
                 <p>
-                  <span class="fc_blue">会议联系人:</span>李某某
+                  <span class="fc_blue">会议联系人:</span>
+                  {{item.truename}}
                 </p>
                 <p>
-                  <span class="fc_blue">手 机:</span>13888888888
-                </p>
-              </div>
-              <div style="margin:10px">
-                <p>
-                  <span class="fc_blue">会议联系人:</span>李某某
-                </p>
-                <p>
-                  <span class="fc_blue">手 机:</span>13888888888
+                  <span class="fc_blue">手 机:</span>
+                  {{item.phone}}
                 </p>
               </div>
             </div>
@@ -166,13 +166,19 @@ export default {
       starTime: "",
       endTime: "",
       show: "", //个人中心显示,,
-      meetingCollection: {}
+      meetingCollection: {},
+      PaperRequireinfoTime: "", //投稿截止时间
+      imgList: [],
+      url: "http://121.42.53.174:9008/static",
+      personList: []
     };
   },
   created() {
     this.personal();
     this.getMeeting(); //获取会议信息
     this.getUser(); //获取会员id
+    this.getPaperRequireinfo(); //获取投稿时间
+    this.getContactUs(); //联系我们
   },
   filters: {
     time(val) {
@@ -201,12 +207,13 @@ export default {
       this.$router.go(0);
     },
     getMeeting() {
-      this.$http.get("/app/meeting/info/1", {}, res => {
-        if (res && res.msg === "success") {
+      this.$http.get(`/app/meeting/info/${this.baseMeetintgId}`, {}, res => {
+        if (res && res.code === 0) {
           this.meetingCollection = res.meeting;
           this.starTime = res.meeting.startTime;
           this.endTime = res.meeting.endTime;
-          window.sessionStorage.setItem('meetingId',res.meeting.id) 
+          this.imgList = res.meeting.titlePicture.split(",");
+          window.sessionStorage.setItem("meetingId", res.meeting.id);
         }
       });
     },
@@ -214,6 +221,24 @@ export default {
       //获取用户id
       this.$http.get("/app/user/info", {}, res => {
         window.sessionStorage.setItem("userId", res.user.userId);
+      });
+    },
+    //投稿时间
+    getPaperRequireinfo() {
+      this.$http.get(`/app/meeting/paperrequireinfo/${this.baseMeetintgId}`, {}, res => {
+        if (res && res.code === 0) {
+          this.PaperRequireinfoTime = res.paperRequir.deadline;
+        }
+      });
+    },
+    //联系我们
+    getContactUs() {
+      this.$http.get(`/app/meeting/contact/${this.baseMeetintgId}`, {}, res => {
+        if (res && res.code === 0) {
+          this.personList = res.list;
+        } else {
+          window.console.log(res.success);
+        }
       });
     }
   },
@@ -292,6 +317,7 @@ export default {
           position: absolute;
           top: 10px;
           right: 10px;
+          z-index: 10000000000;
         }
       }
     }
@@ -311,6 +337,7 @@ export default {
         height: 100%;
         border: 1px solid #ccc;
         padding: 10px;
+        overflow: hidden;
         box-sizing: border-box;
         background-color: #fff;
       }

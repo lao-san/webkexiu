@@ -23,9 +23,10 @@ export default {
   },
   methods: {
     getPosting() {
-      this.$http.get("/app/paperrequire/info/1", {}, res => {
+      this.$http.get(`/app/meeting/paperrequireinfo/${this.baseMeetintgId}`, {}, res => {
         if (res && res.msg == "success") {
-          this.content = res.paperRequire;
+          // window.console.log(res)
+          this.content = res.paperRequir;
         }
       });
     }

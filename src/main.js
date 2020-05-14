@@ -8,6 +8,7 @@ import '@/style/base.css'
 import request from './util/request.js'
 
 Vue.prototype.$http = request
+Vue.prototype.baseMeetintgId = 1
 
 Vue.use(ElementUI);
 
